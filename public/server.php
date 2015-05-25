@@ -13,14 +13,14 @@ unset($_GET['_url'], $_REQUEST['_url']);
 $headers = get_request_headers();
 
 // transfer posted json data to global request data arrays
-if (stripos(@$headers['Content-Type'], 'application/json') !== false) {
-	$data = file_get_contents('php://input');
-	$json_data = json_decode($data, true);
-	if (is_array($json_data)) {
-		$_REQUEST = array_merge($_REQUEST, $json_data);
-		$_POST = $json_data;
-	}
+$data = file_get_contents('php://input');
+
+$json_data = json_decode($data, true);
+if (is_array($json_data)) {
+	$_REQUEST = array_merge($_REQUEST, $json_data);
+	$_POST = $json_data;
 }
+Session::authenticateRequest($data, $headers);
 
 try {
 	ApplicationController::load($requested_route, $headers, $_REQUEST);

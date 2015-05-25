@@ -15,20 +15,10 @@
 	</head>
 	<body>
 
-		<div class="ui-tabs ui-widget">
-			<ul class="ui-tabs-nav ui-helper-reset ui-helper-clearfix ui-widget-header">
-			<?php foreach($actions as $label => $url): ?>
-				<li class="ui-state-default ui-corner-top <?php if (@$current_page == $label) echo "ui-tabs-active ui-state-active"?>">
-					<a class="ui-tabs-anchor" href="<?php echo $url ?>"><?php echo $label ?></a>
-				</li>
-			<?php endforeach ?>
-			</ul>
-		</div>
+
 
 		<div class="content-wrapper ui-widget">
-			<?php View::load('errors', compact('errors')) ?>
-			<?php View::load('messages', compact('messages')) ?>
-
+			
 			<div class="content">
 				<?php View::load($content_view, $params) ?>
 			</div>

@@ -1,5 +1,7 @@
 <?php
 
+ini_set('session.use_cookies', '0'); //Turn off session cookies
+
 define('IS_MVC', true);
 
 ClassLoader::addRepository('MVC', LIBRARIES_DIR . 'dabl/mvc');
@@ -12,33 +14,7 @@ foreach ($helpers as $helper) {
 
 /** Session * */
 // start the session
-$sn = session_name();
-$sessid = null;
-//Find the session either in the cookie or the $_GET
-if (isset($_COOKIE[$sn])) {
-	$sessid = $_COOKIE[$sn];
-} else if (isset($_GET[$sn])) {
-	$sessid = $_GET[$sn];
-}
-//Check for valid sessionid
-if ($sessid && !preg_match('/^[a-zA-Z0-9,\-]{22,40}$/', $sessid)) {
-	//If invalid, delete the cookie and redirect to /
-	$params = session_get_cookie_params();
-	setcookie(
-		session_name(),
-		'',
-		time() - 42000,
-		$params['path'],
-		$params['domain'],
-		$params['secure'],
-		$params['httponly']
-	);
 
-	if (!headers_sent()) {
-		redirect('/');
-	}
-	throw new RuntimeException('Session ID was invalid and couldn\'t recover');
-}
 $result = @session_start();
 if (!$result) {
 	if (!headers_sent()) {
