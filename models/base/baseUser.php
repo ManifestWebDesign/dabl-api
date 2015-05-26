@@ -328,6 +328,113 @@ abstract class baseUser extends ApplicationModel {
 	}
 
 	/**
+	 * Returns a Query for selecting session Objects(rows) from the session table
+	 * with a userId that matches $this->id.
+	 * @return Query
+	 */
+	function getSessionsRelatedByUserIdQuery(Query $q = null) {
+		return $this->getForeignObjectsQuery('session', 'userId', 'id', $q);
+	}
+
+	/**
+	 * Returns the count of Session Objects(rows) from the session table
+	 * with a userId that matches $this->id.
+	 * @return int
+	 */
+	function countSessionsRelatedByUserId(Query $q = null) {
+		if (null === $this->getid()) {
+			return 0;
+		}
+		return Session::doCount($this->getSessionsRelatedByUserIdQuery($q));
+	}
+
+	/**
+	 * Deletes the session Objects(rows) from the session table
+	 * with a userId that matches $this->id.
+	 * @return int
+	 */
+	function deleteSessionsRelatedByUserId(Query $q = null) {
+		if (null === $this->getid()) {
+			return 0;
+		}
+		$this->SessionsRelatedByUserId_c = array();
+		return Session::doDelete($this->getSessionsRelatedByUserIdQuery($q));
+	}
+
+	protected $SessionsRelatedByUserId_c = array();
+
+	/**
+	 * Returns an array of Session objects with a userId
+	 * that matches $this->id.
+	 * When first called, this method will cache the result.
+	 * After that, if $this->id is not modified, the
+	 * method will return the cached result instead of querying the database
+	 * a second time(for performance purposes).
+	 * @return Session[]
+	 */
+	function getSessionsRelatedByUserId(Query $q = null) {
+		if (null === $this->getid()) {
+			return array();
+		}
+
+		if (
+			null === $q
+			&& $this->getCacheResults()
+			&& !empty($this->SessionsRelatedByUserId_c)
+			&& !$this->isColumnModified('id')
+		) {
+			return $this->SessionsRelatedByUserId_c;
+		}
+
+		$result = Session::doSelect($this->getSessionsRelatedByUserIdQuery($q));
+
+		if ($q !== null) {
+			return $result;
+		}
+
+		if ($this->getCacheResults()) {
+			$this->SessionsRelatedByUserId_c = $result;
+		}
+		return $result;
+	}
+
+	/**
+	 * Convenience function for User::getSessionsRelatedByuserId
+	 * @return Session[]
+	 * @see User::getSessionsRelatedByUserId
+	 */
+	function getSessions($extra = null) {
+		return $this->getSessionsRelatedByUserId($extra);
+	}
+
+	/**
+	  * Convenience function for User::getSessionsRelatedByuserIdQuery
+	  * @return Query
+	  * @see User::getSessionsRelatedByuserIdQuery
+	  */
+	function getSessionsQuery(Query $q = null) {
+		return $this->getForeignObjectsQuery('session', 'userId','id', $q);
+	}
+
+	/**
+	  * Convenience function for User::deleteSessionsRelatedByuserId
+	  * @return int
+	  * @see User::deleteSessionsRelatedByuserId
+	  */
+	function deleteSessions(Query $q = null) {
+		return $this->deleteSessionsRelatedByUserId($q);
+	}
+
+	/**
+	  * Convenience function for User::countSessionsRelatedByuserId
+	  * @return int
+	  * @see User::countSessionsRelatedByUserId
+	  */
+	function countSessions(Query $q = null) {
+		return $this->countSessionsRelatedByUserId($q);
+	}
+
+	/**
 	 * Returns true if the column values validate.
 	 * @return bool
 	 */

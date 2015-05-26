@@ -20,7 +20,7 @@ if (is_array($json_data)) {
 	$_REQUEST = array_merge($_REQUEST, $json_data);
 	$_POST = $json_data;
 }
-Session::authenticateRequest($data, $headers);
+App::authenticateRequest($data, $headers);
 
 try {
 	ApplicationController::load($requested_route, $headers, $_REQUEST);

@@ -4,6 +4,28 @@
 SET FOREIGN_KEY_CHECKS = 0;
 
 -- ---------------------------------------------------------------------
+-- session
+-- ---------------------------------------------------------------------
+
+DROP TABLE IF EXISTS `session`;
+
+CREATE TABLE `session`
+(
+	`userId` INTEGER(10) NOT NULL,
+	`authToken` VARCHAR(255) NOT NULL,
+	`phpSessionToken` VARCHAR(255) NOT NULL,
+	`created` DATETIME NOT NULL,
+	`updated` DATETIME NOT NULL,
+	PRIMARY KEY (`userId`),
+	UNIQUE INDEX `sessionId` (`authToken`(255)),
+	CONSTRAINT `session_ibfk_1`
+		FOREIGN KEY (`userId`)
+		REFERENCES `user` (`id`)
+		ON UPDATE CASCADE
+		ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+-- ---------------------------------------------------------------------
 -- user
 -- ---------------------------------------------------------------------
 
