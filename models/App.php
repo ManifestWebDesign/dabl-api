@@ -2,24 +2,60 @@
 
 class App {
 	static protected $authToken;
-	static protected $requestData;
 
-	static protected $authHeaderKey = 'RedtruckAPI ';
-	static protected $token = 'Rl?IL:-rJb6kNW:T)3+^-H9i&u ydwyA/r>Y\TKXSHFaqiBMJ (w?<j{n.cO|7[ejSQSr[Fy(>=XzoQw5k>X/oLhSpD=9=8.dF&W';
-	static protected $client = 'token';
+	static protected $authHeaderKey = null;
+	static protected $sharedSecret = null;
+	static protected $clientHash = null;
 
 	static protected $validUserToken = false;
 
+	static protected $userId = null;
+
+	static function setConfigValues($config) {
+		if (!empty($config['authHeaderKey'])) {
+			self::$authHeaderKey = $config['authHeaderKey'] . ' ';
+		} else {
+			throw new Exception('Auth header key not defined');
+		}
+
+		if (!empty($config['sharedSecret'])) {
+			self::$sharedSecret = $config['sharedSecret'];
+		} else {
+			throw new Exception('Shared secret not defined');
+		}
+
+		if (!empty($config['clientHash'])) {
+			self::$clientHash = $config['clientHash'];
+		} else {
+			throw new Exception('Client hash not defined');
+		}
+	}
+
 	static function setAuthToken($value) {
-		self::$authToken = $value;
+		self::$authToken = $_SESSION['__authToken'] = $value;
 	}
 
 	static function getAuthToken() {
+
+		if (!self::$authToken && !empty($_SESSION['__authToken'])) {
+			self::$authToken = $_SESSION['__authToken'];
+		}
 		return self::$authToken;
 	}
 
-	static function setRequestData($value){
-		self::$requestData = $value;
+	static function isAuthenticated() {
+		return self::$validUserToken;
+	}
+
+	static function getUserId() {
+		if (!self::$userId && !empty($_SESSION['__userId'])) {
+			self::$userId = $_SESSION['__userId'];
+		}
+		return self::$userId;
+	}
+
+	static private function setUserId($value) {
+		self::$userId = $_SESSION['__userId'] = $value;
 	}
 
 	static function login($request) {
@@ -62,6 +98,7 @@ class App {
 			$session->save();
 
 			self::setAuthToken($session->getAuthToken());
+			self::setUserId($user->getId());
 			return $user;
 		} else {
 			throw new Exception('Invalid user/password combination');
@@ -99,11 +136,11 @@ class App {
 			throw new Exception('Auth header incorrect');
 		}
 		$auth = explode(':', $authorization);
-		if ($auth[0] !== self::$client) {
+		if ($auth[0] !== self::$clientHash) {
 			throw new Exception("Client key incorrect: '$auth'");
 		}
 
-		$hash = hash_hmac('sha512', md5($request) .','.$time, self::$token);
+		$hash = hash_hmac('sha512', md5($request) .','.$time, self::$sharedSecret);
 		if (!hash_equals($hash, $auth[1])) {
 			throw new Exception("Hash: '$hash' doesn\'t match '$auth[1]'");
 		}
@@ -111,7 +148,7 @@ class App {
 		if (!empty($headers['X-Username'])) {
 			$user = User::retrieveByUsername($headers['X-Username']);
 			if ($user && !empty($headers['X-User-Token'])) { //Can also check for active status
-				$session =  Session::doSelectOne(Query::create()->add(Session::USER_ID, $user->getId())->add(Session::AUTH_TOKEN, $headers['X-User-Token']));
+				$session = Session::doSelectOne(Query::create()->add(Session::USER_ID, $user->getId())->add(Session::AUTH_TOKEN, $headers['X-User-Token']));
 				if ($session) {
 					self::startSession($session->getPhpSessionToken());
 					self::$validUserToken = true;

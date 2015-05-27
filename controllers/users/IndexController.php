@@ -1,6 +1,6 @@
 <?php
 
-class IndexController extends ApplicationController {
+class IndexController extends AuthenticatedApplicationController {
 
 	/**
 	 * Returns all User records matching the query. Examples:

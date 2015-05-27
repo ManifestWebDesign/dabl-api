@@ -24,8 +24,8 @@ App::authenticateRequest($data, $headers);
 
 try {
 	ApplicationController::load($requested_route, $headers, $_REQUEST);
-} catch (FileNotFoundException $e) {
-	error_log($e->getMessage());
-	echo '<h1>File Not Found</h1>';
-	die(htmlentities($e->getMessage()));
+} catch (Exception $e) {
+	error_log($e);
+	http_response_code(401);
+	die();
 }
