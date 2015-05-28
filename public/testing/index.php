@@ -1,15 +1,18 @@
 <?php
 
+define('CONFIG_DIR', '../../config/');
+echo "<pre>";
 function makeRequest($url, $content, $username = null, $userToken = null) {
-	$publicHash = '9e6678ebcabedc15a82f270fee26f5e694f78600c24a60cf74';
-	$privateHash = 'Rl?IL:-rJb6kNW:T)3+^-H9i&u ydwyA/r>Y\TKXSHFaqiBMJ (w?<j{n.cO|7[ejSQSr[Fy(>=XzoQw5k>X/oLhSpD=9=8.dF&W';
+	$hashdata = parse_ini_file(CONFIG_DIR . 'api.ini', true);
+	$publicHash = $hashdata['clientHash'];
+	$privateHash = $hashdata['sharedSecret'];
 	$time = time();
 	$contentmd5 = md5($content);
 
 	$hash = hash_hmac('sha512', $contentmd5 .','.$time, $privateHash);
 
 	$headers = array(
-		'Authorization: RedtruckAPI ' . $publicHash . ':' . $hash,
+		"Authorization: {$hashdata['authHeaderKey']} $publicHash:$hash",
 		'X-Timestamp: ' . $time
 	);
 	if ($username) {
@@ -18,7 +21,7 @@ function makeRequest($url, $content, $username = null, $userToken = null) {
 	if ($userToken) {
 		$headers[] = "X-User-Token: $userToken";
 	}
-	$ch = curl_init($url);
+	$ch = curl_init($_SERVER['SERVER_NAME'] . '/'.$url);
 	curl_setopt($ch,CURLOPT_HTTPHEADER,$headers);
 	curl_setopt($ch,CURLOPT_RETURNTRANSFER,true);
 	if ($content) {
@@ -26,27 +29,34 @@ function makeRequest($url, $content, $username = null, $userToken = null) {
 	}
 
 	$result = curl_exec($ch);
+	$infos = curl_getinfo($ch);
 	curl_close($ch);
 
+	echo "Curl info:\n";
+	print_r($infos);
+	echo "\n";
 	return json_decode($result, true);
 }
 
-function login() {
+function login($username, $password) {
 	$content    = json_encode(array(
-		'credentials' => base64_encode('nathan') . ':' . base64_encode('nathan')
+		'credentials' => base64_encode($username) . ':' . base64_encode($password)
 	));
 
+	echo "CALLING LOGIN\n\n";
+	$obj = makeRequest('users/login/', $content);
 
-	$obj = makeRequest('http://redtruck-api/users/login/', $content);
-
-	echo "RESULT\n======\n<pre>".print_r($obj, true)."</pre>\n\n";
+	echo print_r($obj, true)."\n\nFINISHED CALLING LOGIN\n\n";
+	return $obj;
 }
 
-function getUsers() {
-	$obj = makeRequest('http://redtruck-api/users/index/', null, 'nathan', '6666d5d45d482b1c19007582f1d413aeb2f8dd9cea5a29d4a3');
-
-
-	echo "<pre>RESULT\n======\nJson decoded: " . print_r($obj, true). "</pre>\n\n";
+function getUsers($username, $authtoken) {
+	echo "CALLING GET USERS\n\n";
+	$obj = makeRequest('users/index/', null, $username, $authtoken);
+	echo print_r($obj, true). "\n\nFINISHED CALLING GET USERS\n\n";
 }
 
-getUsers();
+
+$user = login('nathan', 'nathan');
+
+getUsers($user['username'], $user['authToken']);
