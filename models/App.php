@@ -128,7 +128,7 @@ class App {
 		}
 		$authHeader = $headers['Authorization'];
 		if (strpos($authHeader, self::$authHeaderKey) !== 0) {
-			throw new Exception('Auth header incorrect');
+			throw new Exception("Auth header incorrect, value '" . self::$authHeaderKey . " not found': $authHeader");
 		}
 
 		$authorization = substr($authHeader, strlen(self::$authHeaderKey));
@@ -140,7 +140,7 @@ class App {
 			throw new Exception("Client key incorrect: '$auth'");
 		}
 
-		$hash = hash_hmac('sha512', md5($request) .','.$time, self::$sharedSecret);
+		$hash = hash_hmac('sha512', hash('sha512', $request) .','.$time, self::$sharedSecret);
 		if (!hash_equals($hash, $auth[1])) {
 			throw new Exception("Hash: '$hash' doesn\'t match '$auth[1]'");
 		}

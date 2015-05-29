@@ -7,9 +7,9 @@ function makeRequest($url, $content, $username = null, $userToken = null) {
 	$publicHash = $hashdata['clientHash'];
 	$privateHash = $hashdata['sharedSecret'];
 	$time = time();
-	$contentmd5 = md5($content);
+	$contenthash = hash('sha512', $content);
 
-	$hash = hash_hmac('sha512', $contentmd5 .','.$time, $privateHash);
+	$hash = hash_hmac('sha512', $contenthash .','.$time, $privateHash);
 
 	$headers = array(
 		"Authorization: {$hashdata['authHeaderKey']} $publicHash:$hash",
