@@ -83,17 +83,12 @@ class App {
 		}
 
 		if (password_verify($password, $user->getPasswordHash())) {
-			$session = Session::retrieveByPK($user->getId());
-			$oldsession = null;
-			if (!$session) {
-				$session = new Session();
-				$session->setUserId($user->getId());
 
-			} else {
-				$oldsession = $session->getPhpSessionToken();
-			}
+			$session = new Session();
+			$session->setUserId($user->getId());
+
 			$session->createAuthToken();
-			$sessionid = self::startNewSession($oldsession);
+			$sessionid = self::startNewSession();
 			$session->setPhpSessionToken($sessionid);
 			$session->save();
 
@@ -103,6 +98,21 @@ class App {
 		} else {
 			throw new Exception('Invalid user/password combination');
 		}
+	}
+
+	static function logout() {
+		$session = self::getCurrentSession();
+		if ($session) {
+			$session->setSessionEnd(CURRENT_TIMESTAMP);
+			$session->save();
+		}
+		self::destroyCurrentSession();
+		self::setAuthToken(null);
+		self::setUserId(null);
+	}
+
+	static function getCurrentSession() {
+		return Session::retrieveByAuthToken(self::getAuthToken());
 	}
 
 	static function authenticateRequest($request, $headers) {

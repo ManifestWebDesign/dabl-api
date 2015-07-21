@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <database name="redtruck_alpha">
   <table name="session" phpName="Session">
-    <column name="userId" phpName="Userid" type="INTEGER" size="10" primaryKey="true" required="true"/>
+    <column name="phpSessionToken" phpName="Phpsessiontoken" type="VARCHAR" size="255" primaryKey="true" required="true"/>
+    <column name="userId" phpName="Userid" type="INTEGER" size="10" required="true"/>
     <column name="authToken" phpName="Authtoken" type="VARCHAR" size="255" required="true"/>
-    <column name="phpSessionToken" phpName="Phpsessiontoken" type="VARCHAR" size="255" required="true"/>
+    <column name="sessionEnd" phpName="Sessionend" type="TIMESTAMP" required="false"/>
     <column name="created" phpName="Created" type="TIMESTAMP" required="true"/>
     <column name="updated" phpName="Updated" type="TIMESTAMP" required="true"/>
     <foreign-key foreignTable="user" name="session_ibfk_1" onDelete="CASCADE" onUpdate="CASCADE">
@@ -12,6 +13,9 @@
     <unique name="sessionId">
       <unique-column name="authToken"/>
     </unique>
+    <index name="userId">
+      <index-column name="userId"/>
+    </index>
   </table>
   <table name="user" phpName="User">
     <column name="id" phpName="Id" type="INTEGER" size="255" primaryKey="true" autoIncrement="true" required="true"/>

@@ -8,9 +8,10 @@
  */
 abstract class baseSession extends ApplicationModel {
 
+	const PHP_SESSION_TOKEN = 'session.phpSessionToken';
 	const USER_ID = 'session.userId';
 	const AUTH_TOKEN = 'session.authToken';
-	const PHP_SESSION_TOKEN = 'session.phpSessionToken';
+	const SESSION_END = 'session.sessionEnd';
 	const CREATED = 'session.created';
 	const UPDATED = 'session.updated';
 
@@ -45,14 +46,14 @@ abstract class baseSession extends ApplicationModel {
 	 * @var string[]
 	 */
 	protected static $_primaryKeys = array(
-		'userId',
+		'phpSessionToken',
 	);
 
 	/**
 	 * string name of the primary key column
 	 * @var string
 	 */
-	protected static $_primaryKey = 'userId';
+	protected static $_primaryKey = 'phpSessionToken';
 
 	/**
 	 * true if primary key is an auto-increment column
@@ -65,9 +66,10 @@ abstract class baseSession extends ApplicationModel {
 	 * @var string[]
 	 */
 	protected static $_columns = array(
+		Session::PHP_SESSION_TOKEN,
 		Session::USER_ID,
 		Session::AUTH_TOKEN,
-		Session::PHP_SESSION_TOKEN,
+		Session::SESSION_END,
 		Session::CREATED,
 		Session::UPDATED,
 	);
@@ -77,9 +79,10 @@ abstract class baseSession extends ApplicationModel {
 	 * @var string[]
 	 */
 	protected static $_columnNames = array(
+		'phpSessionToken',
 		'userId',
 		'authToken',
-		'phpSessionToken',
+		'sessionEnd',
 		'created',
 		'updated',
 	);
@@ -89,12 +92,19 @@ abstract class baseSession extends ApplicationModel {
 	 * @var string[]
 	 */
 	protected static $_columnTypes = array(
+		'phpSessionToken' => Model::COLUMN_TYPE_VARCHAR,
 		'userId' => Model::COLUMN_TYPE_INTEGER,
 		'authToken' => Model::COLUMN_TYPE_VARCHAR,
-		'phpSessionToken' => Model::COLUMN_TYPE_VARCHAR,
+		'sessionEnd' => Model::COLUMN_TYPE_TIMESTAMP,
 		'created' => Model::COLUMN_TYPE_TIMESTAMP,
 		'updated' => Model::COLUMN_TYPE_TIMESTAMP,
 	);
+
+	/**
+	 * `phpSessionToken` VARCHAR NOT NULL
+	 * @var string
+	 */
+	protected $phpSessionToken;
 
 	/**
 	 * `userId` INTEGER NOT NULL DEFAULT ''
@@ -109,10 +119,10 @@ abstract class baseSession extends ApplicationModel {
 	protected $authToken;
 
 	/**
-	 * `phpSessionToken` VARCHAR NOT NULL
+	 * `sessionEnd` TIMESTAMP
 	 * @var string
 	 */
-	protected $phpSessionToken;
+	protected $sessionEnd;
 
 	/**
 	 * `created` TIMESTAMP NOT NULL
@@ -125,6 +135,21 @@ abstract class baseSession extends ApplicationModel {
 	 * @var string
 	 */
 	protected $updated;
+
+	/**
+	 * Gets the value of the phpSessionToken field
+	 */
+	function getPhpSessionToken() {
+		return $this->phpSessionToken;
+	}
+
+	/**
+	 * Sets the value of the phpSessionToken field
+	 * @return Session
+	 */
+	function setPhpSessionToken($value) {
+		return $this->setColumnValue('phpSessionToken', $value, Model::COLUMN_TYPE_VARCHAR);
+	}
 
 	/**
 	 * Gets the value of the userId field
@@ -157,18 +182,24 @@ abstract class baseSession extends ApplicationModel {
 	}
 
 	/**
-	 * Gets the value of the phpSessionToken field
+	 * Gets the value of the sessionEnd field
 	 */
-	function getPhpSessionToken() {
-		return $this->phpSessionToken;
+	function getSessionEnd($format = null) {
+		if (null === $this->sessionEnd || null === $format) {
+			return $this->sessionEnd;
+		}
+		if (0 === strpos($this->sessionEnd, '0000-00-00')) {
+			return null;
+		}
+		return date($format, strtotime($this->sessionEnd));
 	}
 
 	/**
-	 * Sets the value of the phpSessionToken field
+	 * Sets the value of the sessionEnd field
 	 * @return Session
 	 */
-	function setPhpSessionToken($value) {
-		return $this->setColumnValue('phpSessionToken', $value, Model::COLUMN_TYPE_VARCHAR);
+	function setSessionEnd($value) {
+		return $this->setColumnValue('sessionEnd', $value, Model::COLUMN_TYPE_TIMESTAMP);
 	}
 
 	/**
@@ -225,8 +256,8 @@ abstract class baseSession extends ApplicationModel {
 	 * the one input.
 	 * @return Session
 	 */
-	 static function retrieveByPK($user_id) {
-		return static::retrieveByPKs($user_id);
+	 static function retrieveByPK($php_session_token) {
+		return static::retrieveByPKs($php_session_token);
 	}
 
 	/**
@@ -234,19 +265,28 @@ abstract class baseSession extends ApplicationModel {
 	 * the ones input.
 	 * @return Session
 	 */
-	static function retrieveByPKs($user_id) {
-		if (null === $user_id) {
+	static function retrieveByPKs($php_session_token) {
+		if (null === $php_session_token) {
 			return null;
 		}
 		if (static::$_poolEnabled) {
-			$pool_instance = static::retrieveFromPool($user_id);
+			$pool_instance = static::retrieveFromPool($php_session_token);
 			if (null !== $pool_instance) {
 				return $pool_instance;
 			}
 		}
 		$q = new Query;
-		$q->add('userId', $user_id);
+		$q->add('phpSessionToken', $php_session_token);
 		return static::doSelectOne($q);
+	}
+
+	/**
+	 * Searches the database for a row with a phpSessionToken
+	 * value that matches the one provided
+	 * @return Session
+	 */
+	static function retrieveByPhpSessionToken($value) {
+		return Session::retrieveByPK($value);
 	}
 
 	/**
@@ -255,7 +295,7 @@ abstract class baseSession extends ApplicationModel {
 	 * @return Session
 	 */
 	static function retrieveByUserId($value) {
-		return Session::retrieveByPK($value);
+		return static::retrieveByColumn('userId', $value);
 	}
 
 	/**
@@ -268,12 +308,12 @@ abstract class baseSession extends ApplicationModel {
 	}
 
 	/**
-	 * Searches the database for a row with a phpSessionToken
+	 * Searches the database for a row with a sessionEnd
 	 * value that matches the one provided
 	 * @return Session
 	 */
-	static function retrieveByPhpSessionToken($value) {
-		return static::retrieveByColumn('phpSessionToken', $value);
+	static function retrieveBySessionEnd($value) {
+		return static::retrieveByColumn('sessionEnd', $value);
 	}
 
 	/**
@@ -416,11 +456,11 @@ abstract class baseSession extends ApplicationModel {
 	 */
 	function validate() {
 		$this->_validationErrors = array();
+		if (null === $this->getuserId()) {
+			$this->_validationErrors[] = 'userId must not be null';
+		}
 		if (null === $this->getauthToken()) {
 			$this->_validationErrors[] = 'authToken must not be null';
-		}
-		if (null === $this->getphpSessionToken()) {
-			$this->_validationErrors[] = 'phpSessionToken must not be null';
 		}
 		return 0 === count($this->_validationErrors);
 	}

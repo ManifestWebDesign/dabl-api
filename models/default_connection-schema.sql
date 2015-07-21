@@ -11,13 +11,15 @@ DROP TABLE IF EXISTS `session`;
 
 CREATE TABLE `session`
 (
+	`phpSessionToken` VARCHAR(255) NOT NULL,
 	`userId` INTEGER(10) NOT NULL,
 	`authToken` VARCHAR(255) NOT NULL,
-	`phpSessionToken` VARCHAR(255) NOT NULL,
+	`sessionEnd` DATETIME,
 	`created` DATETIME NOT NULL,
 	`updated` DATETIME NOT NULL,
-	PRIMARY KEY (`userId`),
+	PRIMARY KEY (`phpSessionToken`),
 	UNIQUE INDEX `sessionId` (`authToken`(255)),
+	INDEX `userId` (`userId`(10)),
 	CONSTRAINT `session_ibfk_1`
 		FOREIGN KEY (`userId`)
 		REFERENCES `user` (`id`)
