@@ -128,6 +128,8 @@ class MssqlSchemaParser extends BaseSchemaParser
 			if (
 				strtolower($type) == 'int identity'
 				|| strtolower($type) == 'bigint identity'
+				|| strpos(strtolower($default), 'newid') !== false
+				|| strpos(strtolower($default), 'newsequentialid') !== false
 			) {
 				$autoincrement = true;
 			}

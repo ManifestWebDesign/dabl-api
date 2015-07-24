@@ -144,9 +144,9 @@ foreach ($fields as $key => $field) {
 	if (($field->isNumericType()) && (!ctype_digit($default)) && (!$default)) $default = null;
 ?>
 	protected $<?php echo $field->getName() ?><?php
-if ($field->isNumericType() && $default !== null)
+if (!$field->isAutoIncrement() && $field->isNumericType() && $default !== null)
 	echo ' = ' . $default;
-elseif ($default !== null && strtolower($default) !== 'null')
+elseif (!$field->isAutoIncrement() && $default !== null && strtolower($default) !== 'null')
 	echo " = '" . addslashes($default) . "'"
 ?>;
 
