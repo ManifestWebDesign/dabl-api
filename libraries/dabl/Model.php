@@ -1322,7 +1322,13 @@ abstract class Model implements JsonSerializable {
 		}
 
 		$quoted_table = $conn->quoteIdentifier(static::getTableName(), true);
-		$query_s = 'INSERT INTO ' . $quoted_table . ' (' . implode(', ', $fields) . ') VALUES (' . implode(', ', $placeholders) . ') ';
+		$query_s = 'INSERT INTO ' . $quoted_table . ' (' . implode(', ', $fields) . ')';
+
+		if ($pk && $this->isAutoIncrement() && $conn instanceof DBMSSQL) {
+			$query_s .= " OUTPUT inserted.$pk";
+		}
+
+		$query_s .= ' VALUES (' . implode(', ', $placeholders) . ') ';
 
 		if ($pk && $this->isAutoIncrement() && $conn instanceof DBPostgres) {
 			$query_s .= ' RETURNING ' . $conn->quoteIdentifier($pk, true);
@@ -1343,6 +1349,10 @@ abstract class Model implements JsonSerializable {
 				$id = $conn->lastInsertId();
 				if(empty($id) && $conn instanceof DBRedshift) {
 					$id = $conn->query('SELECT MAX(' . $conn->quoteIdentifier($pk) . ") FROM $quoted_table")->fetchColumn();
+				}
+
+				if (empty($id) && $conn instanceof DBMSSQL) {
+					$id = $result->fetchColumn(0);
 				}
 			}
 			if (null !== $id) {
