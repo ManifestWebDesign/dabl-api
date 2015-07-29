@@ -909,6 +909,14 @@ class Query {
 	}
 
 	/**
+	 * Returns all ORDER BY columns as strings in the form of "COLUMN DIRECTION"
+	 * @return Array
+	 */
+	function getOrders() {
+		return $this->_orders;
+	}
+
+	/**
 	 * Sets the limit of rows that can be returned
 	 * @return Query
 	 * @param $limit Int
