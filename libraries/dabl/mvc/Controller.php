@@ -336,7 +336,7 @@ abstract class Controller extends ArrayObject {
 		// todo: this probably belongs somewhere else
 		if ($this->isRestful()) {
 			$has_id = false;
-			if ((string) (int) $action_name === (string) $action_name) {
+			if (!empty($action_name) && !method_exists(get_class($this), $action_name)) {
 				array_unshift($args, $action_name);
 				$action_name = null;
 				$has_id = true;
