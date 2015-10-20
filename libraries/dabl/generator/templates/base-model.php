@@ -302,7 +302,7 @@ foreach ($fields as $key => $field):
 <?php
 		if ($field->isPrimaryKey() && count($field->getTable()->getPrimaryKey()) === 1) {
 ?>
-		return <?php echo $class_name?>::retrieveByPK($value);
+		return static::retrieveByPK($value);
 <?php
 		} else {
 ?>

@@ -222,6 +222,8 @@ class MssqlSchemaParser extends BaseSchemaParser
 
 	/**
 	 * Loads the primary key for this table.
+	 * Gah! This used to grab all columns that are identities, ignoring the fact that they could possibly not
+	 * be primary keys. Just chop that part of the query out and poof, it works. Gah!!!
 	 */
 	protected function addPrimaryKey(Table $table)
 	{
@@ -231,12 +233,6 @@ class MssqlSchemaParser extends BaseSchemaParser
 						INFORMATION_SCHEMA.TABLE_CONSTRAINTS.CONSTRAINT_NAME = INFORMATION_SCHEMA.CONSTRAINT_COLUMN_USAGE.constraint_name
 						WHERE     (INFORMATION_SCHEMA.TABLE_CONSTRAINTS.CONSTRAINT_TYPE = 'PRIMARY KEY') AND
 						(INFORMATION_SCHEMA.TABLE_CONSTRAINTS.TABLE_NAME = '".$table->getName()."')
-UNION ALL
-SELECT COLUMN_NAME
-FROM INFORMATION_SCHEMA.COLUMNS
-WHERE
-(TABLE_NAME = '".$table->getName()."')
-AND columnproperty(object_id(TABLE_SCHEMA + '.' + TABLE_NAME), COLUMN_NAME, 'IsIdentity') = 1
 ";
 		$stmt = $this->dbh->query($q);
 
