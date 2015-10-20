@@ -1343,7 +1343,7 @@ abstract class Model implements JsonSerializable {
 
 		if ($pk && $this->isAutoIncrement()) {
 			$id = null;
-			if ($conn instanceof DBPostgres || $conn instanceof DBMSSQL) {
+			if (($conn instanceof DBPostgres) || ($conn instanceof DBMSSQL)) {
 				$id = $result->fetchColumn(0);
 			} elseif ($conn->isGetIdAfterInsert()) {
 				$id = $conn->lastInsertId();
