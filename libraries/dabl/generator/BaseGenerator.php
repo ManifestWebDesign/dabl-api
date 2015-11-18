@@ -122,6 +122,7 @@ abstract class BaseGenerator {
 		$table_names = array();
 		foreach ($this->database->getTables() as $table)
 			$table_names[] = $table->getName();
+		ksort($table_names);
 		return $table_names;
 	}
 
