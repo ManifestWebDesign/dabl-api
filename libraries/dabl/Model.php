@@ -373,6 +373,10 @@ abstract class Model implements JsonSerializable {
 			return $value;
 		}
 
+		if ($value instanceof DateTime) {
+			$value = $value->getTimestamp();
+		}
+
 		$timestamp = is_int($value) ? $value : strtotime($value);
 		if (false === $timestamp) {
 			throw new InvalidArgumentException('Unable to parse date: ' . $value);
