@@ -77,6 +77,15 @@ class StringFormat {
 	}
 
 	/**
+	 * Returns a string that enforces PHP variable naming restrictions.
+	 * @param string $string
+	 * @return string
+	 */
+	static function identifier($string) {
+		return preg_replace('/[^a-zA-Z0-9_\x7f-\xff]/', '_', $string);
+	}
+
+	/**
 	 * Returns non-pluralized version of string, with upper-case
 	 * words separated by underscores.
 	 * @param string $string

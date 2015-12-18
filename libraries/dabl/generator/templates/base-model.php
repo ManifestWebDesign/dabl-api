@@ -141,13 +141,16 @@ foreach ($fields as $key => $field) {
 
 	 */
 <?php
-	if (($field->isNumericType()) && (!ctype_digit($default)) && (!$default)) $default = null;
+	if (($field->isNumericType()) && (!ctype_digit($default)) && (!$default)) {
+		$default = null;
+	}
 ?>
-	protected $<?php echo $field->getName() ?><?php
-if (!$field->isAutoIncrement() && $field->isNumericType() && $default !== null)
+	 protected $<?php echo StringFormat::identifier($field->getName()) ?><?php
+if (!$field->isAutoIncrement() && $field->isNumericType() && $default !== null) {
 	echo ' = ' . $default;
-elseif (!$field->isAutoIncrement() && $default !== null && strtolower($default) !== 'null')
-	echo " = '" . addslashes($default) . "'"
+} elseif (!$field->isAutoIncrement() && $default !== null && strtolower($default) !== 'null') {
+	echo " = '" . addslashes($default) . "'";
+}
 ?>;
 
 <?php
@@ -156,7 +159,7 @@ elseif (!$field->isAutoIncrement() && $default !== null && strtolower($default) 
 // GETTERS AND SETTERS
 foreach ($fields as $key => $field):
 	$default = $field->getDefaultValue() ? $field->getDefaultValue()->getValue() : null;
-	$method_name = StringFormat::titleCase($field->getName());
+	$method_name = StringFormat::titleCase(StringFormat::identifier($field->getName()));
 	$params = '';
 	$param_vars = '';
 	if ($field->isTemporalType()) {
@@ -168,7 +171,7 @@ foreach ($fields as $key => $field):
 		$param_vars = '$format';
 	}
 	$used_methods[] = "get$method_name";
-	$raw_method_name = ucfirst($field->getName());
+	$raw_method_name = ucfirst(StringFormat::identifier($field->getName()));
 ?>
 	/**
 	 * Gets the value of the <?php echo $field->getName() ?> field
@@ -187,7 +190,7 @@ foreach ($fields as $key => $field):
 		return date($format, strtotime($this-><?php echo $field->getName() ?>));
 <?php endif ?>
 <?php else: ?>
-		return $this-><?php echo $field->getName() ?>;
+		return $this-><?php echo StringFormat::identifier($field->getName()) ?>;
 <?php endif ?>
 	}
 
@@ -700,7 +703,7 @@ foreach ($this->getForeignKeysToTable($table_name) as $r):
 	foreach ($this->getForeignKeysToTable($table_name) as $r) {
 		$from_table = $r->getTableName();
 
-		if (@$from_table_list[$from_table] > 1) {
+		if (isset($from_table_list[$from_table]) && $from_table_list[$from_table] > 1) {
 			continue;
 		}
 
