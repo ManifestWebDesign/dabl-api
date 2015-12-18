@@ -145,7 +145,7 @@ foreach ($fields as $key => $field) {
 		$default = null;
 	}
 ?>
-	 protected $<?php echo StringFormat::identifier($field->getName()) ?><?php
+	protected $<?php echo StringFormat::identifier($field->getName()) ?><?php
 if (!$field->isAutoIncrement() && $field->isNumericType() && $default !== null) {
 	echo ' = ' . $default;
 } elseif (!$field->isAutoIncrement() && $default !== null && strtolower($default) !== 'null') {
