@@ -22,7 +22,7 @@
 class QueryPager {
 
 	private $page = 1;
-	private $limit = 50;
+	private $limit = null;
 	private $total;
 
 	/**
@@ -165,7 +165,7 @@ class QueryPager {
 	 */
 	function setLimit($per_page) {
 		if (!is_numeric($per_page) || $per_page < 1) {
-			$per_page = 50;
+			return;
 		}
 		$this->limit = $per_page;
 	}
@@ -237,6 +237,9 @@ class QueryPager {
 	 * Gets the total number of pages
 	 */
 	function getPageCount() {
+		if (!$this->limit) {
+			return 1;
+		}
 		$rem = ($this->getTotal() % $this->limit);
 		$rem = ($rem >= 0) ? $rem : 0;
 		$total_pages = ($this->getTotal() - $rem) / $this->limit;

@@ -13,7 +13,7 @@ class <?php echo $controller_name ?> extends ApplicationController {
 		$q = <?php echo $model_name ?>::getQuery(@$_GET);
 
 		// paginate
-		$limit = empty($_REQUEST['limit']) ? 25 : $_REQUEST['limit'];
+		$limit = empty($_REQUEST['limit']) ? null : $_REQUEST['limit'];
 		$page = empty($_REQUEST['page']) ? 1 : $_REQUEST['page'];
 		$class = '<?php echo $model_name ?>';
 		$method = 'doSelectIterator';
