@@ -444,6 +444,8 @@ abstract class Model implements JsonSerializable {
 	}
 
 	/**
+	 * Given an array of params, construct a query where the keys are used as column names
+	 * and values as query parameters. Will try to do fully-qualified names.
 	 * @return Query
 	 */
 	static function getQuery(array $params = array(), Query $q = null) {
@@ -452,14 +454,22 @@ abstract class Model implements JsonSerializable {
 
 		$q = $q ? clone $q : new $query_class;
 
-		if (!$q->getTable()) {
-			$q->setTable(static::getTableName());
+		$tablename = $q->getTable();
+		if (!$tablename) {
+			$tablename = static::getTableName();
+			$q->setTable($tablename);
+		}
+
+		//If an alias has been set, use that for fully-qualified names, otherwise use the table name
+		$alias = $q->getAlias();
+		if (!$alias) {
+			$alias = $tablename;
 		}
 
 		// filters
 		foreach ($params as $key => &$param) {
 			if (static::hasColumn($key)) {
-				$q->add($key, $param);
+				$q->add("$alias.$key", strtolower($param) !== 'null' ? $param : null);
 			}
 		}
 
