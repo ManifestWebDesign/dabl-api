@@ -1,6 +1,6 @@
 h1. DABL API
 
-DABL API is a restful API server that leverages the power of [DABL Proper](https://bitbucket.org/manifestwebdesign/dabl). Its only jobs are
+DABL API is a restful API server that leverages the power of "DABL Proper":https://bitbucket.org/manifestwebdesign/dabl. Its only jobs are:
 1. Receive and authenticate requests
 2. Returns JSON response
 
